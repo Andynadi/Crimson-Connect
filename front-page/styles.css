@@ -1,0 +1,35 @@
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 20px;
+    background-color: #f9f9f9;
+    color: #333;
+  }
+  h1, h2 {
+    color: #a51c30;
+  }
+  .section {
+    margin-bottom: 10px;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  p {
+    font-size: 22px; /* Increased font size for paragraphs */
+  }
+  ol {
+    font-size: 22px; /* Change font size for ordered lists */
+  }
+  ul {
+    padding-left: 20px;
+  }
+  ul li {
+    margin-bottom: 10px;
+  }
+  .highlight {
+    color: #a51c30;
+    font-weight: bold;
+  }
+</style>
