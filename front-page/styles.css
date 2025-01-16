@@ -1,34 +1,98 @@
-
+/* General Styles */
 body {
-  font-family: Arial, sans-serif;
-  line-height: 1.6;
-  margin: 20px;
-  background-color: #f9f9f9;
-  color: #333;
-  width: 60%;
-  margin: auto;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f9f9f9;
+    color: #333;
+    margin: 0 auto;
+    width: 80%;
+    max-width: 1200px;
+    padding: 10px;
 }
+
 h1, h2 {
-  color: #a51c30;
+    color: #a51c30;
 }
-section {
-  background-color: #fff;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
+
 p {
-  font-size: 22px; /* Increased font size for paragraphs */
+    font-size: 18px;
+    margin-bottom: 10px;
 }
-li {
-  font-size: 22px; /* Change font size for ordered lists */
-}
+
 ul {
-  padding-left: 20px;
+    padding-left: 20px;
 }
+
 ul li {
-  margin-bottom: 10px;
+    font-size: 18px;
+    margin-bottom: 8px;
 }
-.highlight {
-  color: #a51c30;
-  font-weight: bold;
+
+/* Section Styles */
+.section {
+    padding: 20px;
+    margin: 20px 0;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section h2 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.section p {
+    text-align: center;
+}
+
+/* Iframe Container */
+.iframe-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    padding-top: 100%; /* Increased aspect ratio for a taller iframe */
+    min-height: 1200px; /* Ensures the iframe has a minimum height */
+}
+
+.iframe-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Footer Styles */
+.footer {
+    text-align: center;
+    margin-top: 40px;
+    padding: 10px 0;
+    background-color: #f1f1f1;
+    color: #666;
+}
+
+.footer p {
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        width: 90%;
+    }
+
+    .iframe-container {
+        padding-top: 150%; /* Increase iframe height further for mobile */
+        min-height: 1400px;
+    }
+
+    h1, h2 {
+        font-size: 24px;
+    }
+
+    p, ul li {
+        font-size: 16px;
+    }
 }
