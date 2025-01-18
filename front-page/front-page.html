@@ -8,6 +8,7 @@
 </head>
 <body>
     <header>
+        <img src="images/logo.webp" alt="Crimson Connect Logo" style="display: block; margin: 0 auto; width: 200px; height: auto;">
         <h1>Crimson Connect</h1>
     </header>
 
@@ -18,21 +19,70 @@
             </p>
         </section>
 
-        <section class="schedule section spaced">
-            <h2>Schedule Your Meetup</h2>
-            <p>Fill out the form below to find your group and schedule your meetup:</p>
-            <div class="iframe-container">
-                <p id="loading-text">Loading scheduling form...</p>
-                <iframe 
-                    src="https://schej.it/e/fE7dd" 
-                    frameborder="0" 
-                    marginheight="0" 
-                    marginwidth="0" 
-                    style="width: 100%; height: 1600px;" 
-                    onload="document.getElementById('loading-text').style.display='none';">
-                </iframe>
-            </div>
-        </section>
+        <div class="form-container">
+            <form id="availabilityForm" action="/submit" method="POST">
+                <table>
+                    <tr>
+                        <th><label for="email">Harvard Email:</label></th>
+                        <td><input type="email" id="email" name="email" required pattern=".+@hks.harvard\.edu"></td>
+                    </tr>
+                    <tr>
+                        <th><label for="monday">Monday:</label></th>
+                        <td>
+                            <input type="time" id="monday-from" name="monday-from" class="time-picker"> to 
+                            <input type="time" id="monday-to" name="monday-to" class="time-picker">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="tuesday">Tuesday:</label></th>
+                        <td>
+                            <input type="time" id="tuesday-from" name="tuesday-from" class="time-picker"> to 
+                            <input type="time" id="tuesday-to" name="tuesday-to" class="time-picker">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="wednesday">Wednesday:</label></th>
+                        <td>
+                            <input type="time" id="wednesday-from" name="wednesday-from" class="time-picker"> to 
+                            <input type="time" id="wednesday-to" name="wednesday-to" class="time-picker">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="thursday">Thursday:</label></th>
+                        <td>
+                            <input type="time" id="thursday-from" name="thursday-from" class="time-picker"> to 
+                            <input type="time" id="thursday-to" name="thursday-to" class="time-picker">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="friday">Friday:</label></th>
+                        <td>
+                            <input type="time" id="friday-from" name="friday-from" class="time-picker"> to 
+                            <input type="time" id="friday-to" name="friday-to" class="time-picker">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="saturday">Saturday:</label></th>
+                        <td>
+                            <input type="time" id="saturday-from" name="saturday-from" class="time-picker"> to 
+                            <input type="time" id="saturday-to" name="saturday-to" class="time-picker">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="sunday">Sunday:</label></th>
+                        <td>
+                            <input type="time" id="sunday-from" name="sunday-from" class="time-picker"> to 
+                            <input type="time" id="sunday-to" name="sunday-to" class="time-picker">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="submit-btn">
+                            <button type="submit">Submit</button>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
 
         <section class="privacy section spaced">
             <h2>Privacy and Safety</h2>
@@ -45,9 +95,10 @@
         </section>
     </main>
 
-    <footer class="footer">
-        <p>&copy; 2025 Crimson Connect. All rights reserved.</p>
+    <footer>
+        <p>© 2025 Crimson Connect. All rights reserved.</p>
     </footer>
+
+    <script src="script.js"></script> <!-- Link to the external JavaScript file -->
 </body>
 </html>
-
