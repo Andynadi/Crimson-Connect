@@ -68,13 +68,29 @@ ul li {
 .footer {
     text-align: center;
     margin-top: 40px;
-    padding: 10px 0;
+    padding: 0px 0;
     background-color: #f1f1f1;
     color: #666;
 }
 
 .footer p {
     margin: 0;
+}
+
+/* Add this CSS to reduce the space between the sections */
+.reduced-space {
+    margin-bottom: 0px; /* Adjust the value as needed */
+}
+
+/* Remove margin or padding from the section and footer */
+.schedule {
+    margin-bottom: 0; /* Remove bottom margin */
+    padding-bottom: 0; /* Remove bottom padding */
+}
+
+.footer {
+    margin-top: 0; /* Remove top margin */
+    padding-top: 0; /* Remove top padding */
 }
 
 /* Responsive Design */
@@ -95,4 +111,10 @@ ul li {
     p, ul li {
         font-size: 16px;
     }
+    
+}
+
+/* Center the title */
+.centered-title {
+    text-align: center;
 }
