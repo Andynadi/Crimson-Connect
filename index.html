@@ -1,11 +1,44 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Demo Website</title>
-    </head>
-    <body>
-        <h1>Our Demonstration Website</h1>
-        <a href='front-page/front-page.html'>Welcome to Crimson Connect - Sign up</a>
-        <a href='our-team/index.html'>Learn more about our team</a>
-    </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crimson Meet</title>
+    <link rel="stylesheet" href="styles/homepage-styles.css">
+</head>
+<body>
+    <header>
+        <h1 class="centered-title">Crimson Meet</h1>
+        <nav>
+            <div><a href="privacy-and-safety/index.html">Privacy and Safety</a></div>
+            <div><a href="our-team/index.html">Our Team</a></div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="intro section spaced">
+            <p>
+                Crimson Meet is a student-led platform that randomly pairs Harvard students for small group coffee/lunch meetups, helping them break out of their social bubbles, foster meaningful connections, and celebrate the diversity of the Harvard community.
+            </p>
+        </section>
+
+        <section class="schedule section spaced reduced-space">
+    
+            <div class="iframe-container">
+                <p id="loading-text">Loading scheduling form...</p>
+                <iframe 
+                    src="https://calendly.com/d/crmw-ttb-vh3/meeting" 
+                    frameborder="0" 
+                    marginheight="0" 
+                    marginwidth="0" 
+                    style="width: 100%; height: 1600px;" 
+                    onload="document.getElementById('loading-text').style.display='none';">
+                </iframe>
+            </div>
+        </section>
+
+    </main>
+
+</body>
 </html>
+
