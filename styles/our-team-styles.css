@@ -7,7 +7,6 @@ body {
 
 h1 {
     color: darkred;
-    text-align: left;
 }
 
 h2 {
@@ -17,7 +16,7 @@ h2 {
 }
 
 h3 {
-    color: darkred;
+    color: black;
     margin-top: 15px;
 }
 
@@ -55,6 +54,10 @@ ul {
 
 li {
     margin-bottom: 5px;
+}
+
+.founder-text {
+    color: #666; /* Match the color of the links */
 }
 
 .important {

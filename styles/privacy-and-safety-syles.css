@@ -1,0 +1,57 @@
+/* Common Styles */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+}
+
+h1 {
+    color: darkred;
+    text-align: left; /* Align the title to the left */
+}
+
+h2 {
+    color: darkred;
+    margin-top: 20px;
+    clear: right;
+}
+
+h3 {
+    color: black;
+    margin-top: 15px;
+}
+
+p {
+    color: black;
+    margin-left: 20px; /* Adjust as needed */
+}
+
+a {
+    text-decoration: none;
+    color: #666;
+}
+
+a:hover {
+    color: darkred;
+    text-decoration: underline;
+}
+
+.section {
+    margin-bottom: 20px;
+}
+
+ul {
+    color: black;
+    margin-left: 40px;
+    padding-left: 0;
+}
+
+li {
+    margin-bottom: 5px;
+}
+
+#photo-of-us {
+    width: 40%;
+    height: auto;
+    float: left;
+    margin: 0 20px 20px 0;
+}

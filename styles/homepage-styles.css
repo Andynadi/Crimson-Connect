@@ -28,6 +28,27 @@ ul li {
     margin-bottom: 8px;
 }
 
+/* Navigation Styles */
+nav div {
+    display: inline-block;
+    margin: 5px;
+}
+
+nav a {
+    display: block;
+    padding: 10px 20px;
+    border: 2px solid #a51c30;
+    border-radius: 5px;
+    color: #a51c30;
+    text-decoration: none;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+nav a:hover {
+    background-color: #a51c30;
+    color: #fff;
+}
+
 /* Section Styles */
 .section {
     padding: 20px;
