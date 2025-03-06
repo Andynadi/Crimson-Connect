@@ -5,132 +5,530 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Comic Neue', Arial, sans-serif;
     line-height: 1.6;
-    background-color: #f4f4f4;
+    background: linear-gradient(135deg, #f0f4ff, #e6eaff);
+    color: #333;
 }
 
 .container {
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 30px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(196, 30, 58, 0.1);
+    overflow: hidden;
 }
 
 header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 10px; /* Reduced from 20px for tighter spacing with intro content */
+    padding: 20px;
+    background: linear-gradient(45deg, #c41e3a, #ff4d4d);
+    color: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 header h1 {
-    color: #c41e3a;  /* Harvard Crimson */
+    color: white;
+    font-size: 2.8em;
+    font-family: 'Comic Neue', cursive;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
     margin-bottom: 10px;
+}
+
+/* Introductory Content (Outside .availability-form) */
+h3 {
+    margin: 0 0 0 35px; /* Removed top margin, kept left padding for alignment, no bottom margin */
+    font-size: 1.2em;
+    color: #333;
+    padding-top: 10px; /* Slight padding to prevent overlap with header */
+}
+
+p {
+    margin: 0 0 0 35px; /* Removed top margin, kept left padding for alignment, no bottom margin */
+    margin-bottom: 0; /* Remove bottom margin to eliminate space before .availability-form */
+    font-size: 1em;
+    color: #444;
 }
 
 .availability-form {
     background: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px; /* Reduced from 25px for tighter spacing */
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    position: relative;
+    background: linear-gradient(135deg, white, #f9f9f9);
+    display: grid;
+    gap: 8px; /* Reduced from 12px for tighter spacing */
 }
 
+/* Card-Based Input Layout for Two-Column Structure */
+.input-card {
+    margin-bottom: 0;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.input-card:hover {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.input-card label {
+    display: block;
+    margin-bottom: 4px;
+    color: #c41e3a;
+    font-weight: bold;
+    font-size: 1em;
+    padding: 8px 12px 0;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    background: #fff;
+    border-radius: 0 0 15px 15px;
+}
+
+.input-icon {
+    margin-right: 8px;
+    color: #c41e3a;
+    font-size: 1em;
+}
+
+.input-card input {
+    width: 100%;
+    padding: 6px 10px 6px 0;
+    border: 2px solid #ff6b6b;
+    border-radius: 8px;
+    background: transparent;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    font-size: 0.9em;
+    line-height: 1.3;
+}
+
+.input-card input:focus {
+    outline: none;
+    border-color: #ff4d4d;
+    box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.error-message {
+    display: none;
+    color: #ff4d4d;
+    font-size: 0.85em;
+    padding: 4px 12px;
+    background: #fff;
+    border-radius: 0 0 15px 15px;
+}
+
+.input-card.invalid .error-message {
+    display: block;
+}
+
+.input-card.invalid input {
+    border-color: #ff4d4d;
+}
+
+/* Two-Column Layout for Email and Date, Start and End Time */
+.email-date-row,
+.time-row {
+    display: flex;
+    gap: 16px;
+}
+
+.email-date-row .input-card,
+.time-row .input-card {
+    flex: 1;
+}
+
+/* Input Group for Checkboxes (Reduced spacing) */
 .input-group {
-    margin-bottom: 20px;
+    margin-bottom: 8px; /* Reduced from 20px for tighter spacing between sections */
 }
 
 .input-group label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 4px; /* Reduced from 8px for compactness */
+    color: #c41e3a;
     font-weight: bold;
+    font-size: 1.1em;
 }
 
-.input-group input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
+/* Original Button Styles with Reduced Width on Desktop */
 .btn {
-    background: #f0f0f0;
+    background: #a3e69a; /* Original solid green */
     border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
+    padding: 12px 25px; /* Original padding */
+    border-radius: 8px; /* Original radius */
     cursor: pointer;
-    font-size: 16px;
+    font-size: 16px; /* Original font size */
+    transition: all 0.3s ease;
+    font-weight: bold;
+    width: 45%; /* Reduced width by ~50% on desktop */
+    display: inline-block; /* Ensure buttons stay inline */
+    margin-right: 10px; /* Spacing between buttons */
+    margin-bottom: 8px; /* Reduced margin for compactness */
 }
 
 .btn:hover {
-    background: #e0e0e0;
+    transform: translateY(-3px); /* Original hover transform */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Original hover shadow */
 }
 
 .btn.primary {
-    background: #c41e3a;
+    background: #c41e3a; /* Original solid red */
     color: white;
 }
 
 .btn.primary:hover {
-    background: #a01830;
+    background: #ff4d4d; /* Original hover color */
 }
 
-.slots-section {
-    margin: 20px 0;
-}
-
-#slots-list {
-    list-style: none;
-}
-
-#slots-list li {
-    background: #f8f8f8;
-    padding: 10px;
-    margin: 5px 0;
-    border-radius: 4px;
+/* Single-Row Layout for Meetup Locations */
+.locations-group.single-row {
     display: flex;
+    flex-wrap: nowrap;
     justify-content: space-between;
+    gap: 8px;
+}
+
+.locations-group.single-row .checkbox-item {
+    width: 24%;
+    margin-bottom: 0; /* Removed margin for tighter spacing */
+    box-sizing: border-box;
+}
+
+/* Checkbox Styling (unchanged, but adjusted for single-row) */
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px; /* Reduced from 12px for tighter spacing */
+    padding: 4px 0; /* Reduced from 8px for compactness */
+    background: linear-gradient(135deg, #fff, #f9f9f9);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.checkbox-item {
+    display: flex;
     align-items: center;
-}
-
-#slots-list button {
-    background: #ff4444;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
+    gap: 6px; /* Reduced from 8px for compactness */
     cursor: pointer;
+    padding: 6px 10px; /* Reduced from 8px 12px for compactness */
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    background: white;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
-h2, h3 {
-    margin-bottom: 20px;
+.checkbox-item:hover {
+    background-color: #f5f5f5;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
-h3 {
-    margin-top: 1.5rem;     /* Add space above */
-    margin-bottom: 0.8rem; /* Reduce space below */
+.checkbox-item input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #c41e3a;
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    background: white;
 }
 
-.text-container {
-    max-width: 800px;
-    margin: 0 auto;
+.checkbox-item input[type="checkbox"]:checked {
+    background: linear-gradient(45deg, #c41e3a, #ff4d4d);
 }
 
-.text-left {
-    text-align: left;
+.checkbox-item input[type="checkbox"]:checked::before {
+    content: '✓';
+    position: absolute;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
-.text-center {
-    text-align: center;
-    margin: 1rem 0;
+.checkbox-item label {
+    font-size: 14px; /* Reduced from 16px for compactness */
+    cursor: pointer;
+    color: #444;
 }
 
-footer {
-    padding: 20px 0;
+/* Order for Locations (unchanged) */
+.locations-group .checkbox-item:nth-child(1) { order: 1; }
+.locations-group .checkbox-item:nth-child(2) { order: 2; }
+.locations-group .checkbox-item:nth-child(3) { order: 3; }
+.locations-group .checkbox-item:nth-child(4) { order: 4; }
+
+/* Two-Per-Line Styling for Filters (Reduced spacing) */
+.filters-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px; /* Reduced from 12px for tightness */
 }
 
+.filters-group .checkbox-item {
+    width: 48%;
+    margin-bottom: 0; /* Removed margin for tighter spacing */
+}
+
+/* Order for Filters (unchanged) */
+.filters-group .checkbox-item:nth-child(1) { order: 1; }
+.filters-group .checkbox-item:nth-child(2) { order: 2; }
+.filters-group .checkbox-item:nth-child(3) { order: 3; }
+.filters-group .checkbox-item:nth-child(4) { order: 4; }
+
+/* --- Other Styles --- */
 h4 {
-    margin-bottom: 1.5rem;
+    margin: 0 0 4px 0; /* Reduced from default margins for tightness before buttons */
+    color: #c41e3a;
+    font-weight: bold;
+    font-size: 1.1em;
 }
 
-.about-heading {
-    margin-top: 3rem;    /* Add space above */
-    margin-bottom: 1rem; /* Reduce space below */
+/* Hide "Experiences open to:" section */
+.experiences-section {
+    display: none;
+}
+
+/* --- Consistent Container Styling --- */
+.additional-filters details,
+.data-privacy details,
+.about-us details {
+    margin-bottom: 8px; /* Reduced from 20px for tightness */
+}
+
+.additional-filters summary,
+.data-privacy summary,
+.about-us summary {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 6px 0; /* Reduced from 8px for compactness */
+    background: linear-gradient(135deg, #fff, #f9f9f9);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.additional-filters summary:hover,
+.data-privacy summary:hover,
+.about-us summary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.additional-filters summary label,
+.data-privacy summary h3,
+.about-us summary h2 {
+    margin: 0;
+    padding-left: 12px;
+    font-size: 1.3em; /* Reduced from 1.5em for compactness */
+    color: #c41e3a;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.additional-filters summary:hover label,
+.data-privacy summary:hover h3,
+.about-us summary:hover h2 {
+    color: #ff4d4d;
+}
+
+/* --- Container Content Styling --- */
+.data-privacy details > p,
+.data-privacy details > h4 {
+    padding-left: 15px;
+    background: white;
+    padding: 10px; /* Reduced from 15px for compactness */
+    border-radius: 0 0 8px 8px;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.additional-filters .checkbox-group,
+.about-us details > * {
+    padding: 10px; /* Reduced from 15px for compactness */
+    background: white;
+    border-radius: 0 0 8px 8px;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Improved Additional Filters Styling --- */
+.additional-filters .checkbox-group {
+    background: #f9f9f9;
+    padding: 10px; /* Reduced from 15px for compactness */
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+}
+
+.additional-filters .checkbox-item {
+    padding: 6px 10px; /* Reduced from 10px 14px for compactness */
+    margin-bottom: 0; /* Removed margin for tightness */
+}
+
+.additional-filters .checkbox-item:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Mobile Optimizations --- */
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+    }
+
+    header {
+        margin-bottom: 5px; /* Tighter spacing on mobile */
+    }
+
+    h3 {
+        margin: 0 0 0 20px; /* Reduced left padding on mobile */
+        padding-top: 5px; /* Reduced padding to prevent overlap */
+        font-size: 1.1em; /* Slightly smaller for mobile */
+    }
+
+    p {
+        margin: 0 0 0 20px; /* Reduced left padding on mobile */
+        margin-bottom: 0; /* No bottom margin on mobile to keep tight with form */
+        font-size: 0.9em;
+    }
+
+    .availability-form {
+        padding: 15px; /* Reduced from 20px for tightness */
+    }
+
+    .availability-form {
+        display: block;
+        gap: 6px; /* Reduced from 12px for tighter spacing */
+    }
+
+    .email-date-row,
+    .time-row {
+        display: block;
+    }
+
+    .email-date-row .input-card,
+    .time-row .input-card {
+        flex: none;
+        width: 100%;
+    }
+
+    .input-card {
+        margin-bottom: 6px; /* Reduced from 12px for tightness */
+    }
+
+    .input-card label {
+        padding: 6px 12px 0; /* Reduced from 8px for compactness */
+    }
+
+    .input-wrapper {
+        padding: 6px 12px; /* Reduced from 8px for compactness */
+    }
+
+    .input-icon {
+        font-size: 0.9em; /* Slightly smaller for mobile */
+    }
+
+    .input-card input {
+        padding: 6px 0; /* Reduced from 8px for compactness */
+        font-size: 14px; /* Slightly smaller for mobile */
+    }
+
+    .error-message {
+        padding: 4px 12px;
+        font-size: 0.8em; /* Slightly smaller for compactness */
+    }
+
+    .btn {
+        padding: 10px 20px; /* Reduced from 12px 25px for compactness */
+        font-size: 14px; /* Reduced from 16px for mobile */
+        width: 100%;
+        margin-right: 0;
+        display: block;
+        margin-bottom: 6px; /* Reduced from 12px for tightness */
+    }
+
+    .checkbox-group {
+        padding: 4px 0; /* Reduced from 8px for compactness */
+        gap: 6px; /* Reduced from 8px for tightness */
+    }
+
+    .locations-group.single-row {
+        display: block;
+        flex-wrap: wrap;
+    }
+
+    .locations-group.single-row .checkbox-item {
+        width: 100%;
+        margin-bottom: 4px; /* Reduced from 8px for tightness */
+        padding: 4px 8px; /* Reduced from 6px 10px for compactness */
+    }
+
+    .checkbox-item label {
+        font-size: 12px; /* Reduced from 14px for compactness */
+    }
+
+    .additional-filters .checkbox-group {
+        padding: 8px; /* Reduced from 10px for compactness */
+    }
+
+    .additional-filters .checkbox-item {
+        padding: 4px 8px; /* Reduced from 6px 10px for compactness */
+    }
+
+    header h1 {
+        font-size: 2em;
+    }
+
+    h4 {
+        margin: 0 0 2px 0; /* Reduced from 4px for tightness */
+        font-size: 1em; /* Reduced for mobile compactness */
+    }
+
+    #matching-preference-modal > div {
+        padding: 15px; /* Reduced from 20px for compactness */
+        width: 90%;
+        max-width: 300px;
+    }
+
+    .additional-filters summary label,
+    .data-privacy summary h3,
+    .about-us summary h2 {
+        font-size: 1.1em; /* Reduced from 1.2em for compactness */
+    }
+
+    .data-privacy details > p,
+    .data-privacy details > h4 {
+        padding-left: 10px; /* Reduced from 15px for compactness */
+        padding: 8px; /* Reduced from 10px for compactness */
+    }
+
+    .additional-filters .checkbox-group,
+    .about-us details > * {
+        padding: 8px; /* Reduced from 10px for compactness */
+    }
+
+    .additional-filters details,
+    .data-privacy details,
+    .about-us details {
+        margin-bottom: 6px; /* Reduced from 8px for tightness */
+    }
 }
