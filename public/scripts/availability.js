@@ -9,6 +9,31 @@ document.addEventListener('DOMContentLoaded', function () {
     const endTimeInput = document.getElementById('end-time');
     const locationCheckboxes = document.querySelectorAll('input[name="locations"]');
 
+    /** 🚨 Set Default Availability Based on Database */
+    async function setDefaultAvailability() {
+        try {
+            const response = await fetch('/api/default-availability');
+            const data = await response.json();
+
+            dateInput.value = data.date;
+            startTimeInput.value = data.startTime;
+            endTimeInput.value = data.endTime;
+        } catch (error) {
+            console.error('❌ Error setting default availability:', error);
+            // Fallback: Set to next day if API fails
+            const today = new Date();
+            const nextDay = new Date(today);
+            nextDay.setDate(today.getDate() + 1);
+            const defaultDate = nextDay.toISOString().split('T')[0];
+            dateInput.value = defaultDate;
+            startTimeInput.value = '12:00';
+            endTimeInput.value = '15:00';
+        }
+    }
+
+    // Set defaults when the page loads
+    setDefaultAvailability();
+
     /** 🚨 Prevent Past Dates from Being Selected */
     function setMinDate() {
         const today = new Date();
@@ -160,20 +185,19 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!validateSlot()) return;
 
         const optOut1to1 = document.getElementById('opt-out-1to1').checked;
-const optOutRepeat = document.getElementById('opt-out-repeat').checked;
-const optOutSameSchool = document.getElementById('opt-out-same-school').checked;
-const onlyMatchSameSchool = document.getElementById('only-match-same-school').checked;
-const selectedExperiences = Array.from(document.querySelectorAll('input[name="experiences"]:checked'))
-    .map(checkbox => checkbox.value);
+        const optOutRepeat = document.getElementById('opt-out-repeat').checked;
+        const optOutSameSchool = document.getElementById('opt-out-same-school').checked;
+        const onlyMatchSameSchool = document.getElementById('only-match-same-school').checked;
+        const selectedExperiences = Array.from(document.querySelectorAll('input[name="experiences"]:checked'))
+            .map(checkbox => checkbox.value);
 
-const slots = Array.from(slotsList.children).map(slot => ({
-    email: emailInput.value,
-    date: slot.dataset.date,
-    startTime: slot.dataset.startTime,
-    endTime: slot.dataset.endTime,
-    locations: slot.dataset.locations.split(',')
-}));
-
+        const slots = Array.from(slotsList.children).map(slot => ({
+            email: emailInput.value,
+            date: slot.dataset.date,
+            startTime: slot.dataset.startTime,
+            endTime: slot.dataset.endTime,
+            locations: slot.dataset.locations.split(',')
+        }));
 
         if (slots.length === 0) {
             alert('Please add at least one valid time slot.');
@@ -220,5 +244,20 @@ const slots = Array.from(slotsList.children).map(slot => ({
             submitSlotsBtn.textContent = 'Submit Availability';
         }
     });
-});
 
+    /** 🔒 Mutual Exclusivity for School Filters */
+    const optOutSchool = document.getElementById("opt-out-same-school");
+    const onlyMatchSchool = document.getElementById("only-match-same-school");
+
+    optOutSchool.addEventListener("change", function() {
+        if (this.checked) {
+            onlyMatchSchool.checked = false;
+        }
+    });
+
+    onlyMatchSchool.addEventListener("change", function() {
+        if (this.checked) {
+            optOutSchool.checked = false;
+        }
+    });
+});

@@ -167,7 +167,7 @@ async function matchUsers() {
                     !usedEmails.has(other.email) &&
                     other.email !== anchor.email &&
                     other.date === anchor.date &&
-                    calculateOverlap(anchor.start_time, anchor.end_time, other.start_time, other.end_time) >= 1 &&
+                    calculateOverlap(anchor.start_time, anchor.end_time, other.start_time, other.end_time) >= 0.75 && // 45 minutes overlap
                     areLocationsCompatible(anchor.locations, other.locations) &&
                     (groupSize > 2 || (anchor.opt_out_1to1 === 0 && other.opt_out_1to1 === 0))  &&
                     (!anchor.opt_out_repeat || !hasMatchedBefore(anchor.email, other.email)) &&

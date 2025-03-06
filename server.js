@@ -91,14 +91,12 @@ app.get('/admin', async (req, res) => {
                 return res.status(500).send("Database error occurred");
             }
             res.render('admin.html', { submissions: rows });
-
         });
     } catch (error) {
         console.error("❌ Admin route error:", error);
         res.status(500).send("Internal server error");
     }
 });
-
 
 // Submit availability route
 app.post('/api/submit-availability', async (req, res) => {
@@ -170,6 +168,42 @@ app.post('/api/submit-availability', async (req, res) => {
         console.error("❌ Database error:", error);
         db.run('ROLLBACK');
         res.status(500).json({ success: false, message: error.message || 'Database error occurred' });
+    }
+});
+
+// New endpoint to get default availability
+app.get('/api/default-availability', async (req, res) => {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Query unmatched future entries, ordered by date and frequency
+        const rows = await new Promise((resolve, reject) => {
+            db.all(`
+                SELECT date, start_time, end_time, COUNT(*) as frequency 
+                FROM availability 
+                WHERE matched = 0 AND date > ? 
+                GROUP BY date, start_time, end_time 
+                ORDER BY frequency DESC, date ASC, start_time ASC 
+                LIMIT 1
+            `, [today], (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
+            });
+        });
+
+        if (rows.length > 0) {
+            const { date, start_time, end_time } = rows[0];
+            res.json({ date, startTime: start_time, endTime: end_time });
+        } else {
+            // If no unmatched entries, set default to next day at 12:00–15:00
+            const nextDay = new Date();
+            nextDay.setDate(nextDay.getDate() + 1);
+            const defaultDate = nextDay.toISOString().split('T')[0];
+            res.json({ date: defaultDate, startTime: '12:00', endTime: '15:00' });
+        }
+    } catch (error) {
+        console.error('❌ Error fetching default availability:', error);
+        res.status(500).json({ error: 'Failed to fetch default availability' });
     }
 });
 
