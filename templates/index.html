@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8R6GZE2DCZ"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -9,21 +8,20 @@
       gtag('js', new Date());
       gtag('config', 'G-8R6GZE2DCZ');
     </script>
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>Crimson Meet</title>
     <link rel="stylesheet" href="/styles/main.css">
+    <!-- Add Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Crimson Meet</h1>
         </header>
+        <h3>Looking to meet new students and alumni for a half an hour coffee chat? Sign Up Now!</h3>
+        <p>We’ll match you with up to 3 people & put you in touch through your university email.</p>
 
-        <h3> Looking to meet new students and alumni for a half an hour coffee chat? Sign Up Now! </h3>
-        <p> We’ll match you with up to 3 people & put you in touch through your university email. </p>
-
-        <!-- Step 1: Email -->
         <div class="availability-step" id="step-email">
             <div class="input-card">
                 <label for="email">University Email:</label>
@@ -36,7 +34,6 @@
             <button class="btn next-btn" id="next-to-locations">Next</button>
         </div>
 
-        <!-- Step 2: Locations -->
         <div class="availability-step" id="step-locations" style="display: none;">
             <div class="input-group">
                 <label>Meetup Locations:</label>
@@ -63,44 +60,23 @@
             <button class="btn next-btn" id="next-to-availability">Next</button>
         </div>
 
-        <!-- Step 3: Availability -->
         <div class="availability-step" id="step-availability" style="display: none;">
-            <div class="email-date-row">
-                <div class="input-card">
-                    <label for="date">Date:</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-calendar-alt input-icon"></i>
-                        <input type="date" id="date" required>
-                    </div>
-                    <span class="error-message" id="date-error">You can indicate more than one availability using "Add Time Slot" below</span>
-                </div>
+            <h4>Select Availability</h4>
+            <div class="calendar-container">
+                <input type="text" id="calendar" placeholder="Select a date">
             </div>
-            <div class="time-row">
-                <div class="input-card">
-                    <label for="start-time">Start Time:</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-clock input-icon"></i>
-                        <input type="time" id="start-time" value="12:00" required>
-                    </div>
-                </div>
-                <div class="input-card">
-                    <label for="end-time">End Time:</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-clock input-icon"></i>
-                        <input type="time" id="end-time" value="15:00" required>
-                    </div>
-                </div>
+            <div class="time-slots" id="time-slots">
+                <!-- Slots will be populated dynamically -->
             </div>
-            <h4>Adding at least 3 slots is recommended</h4>
-            <button id="add-slot" class="btn">Add Time Slot</button>
+            <button id="add-availability" class="btn">Add Another Day</button>
             <div class="slots-section">
+                <h4>Selected Slots</h4>
                 <ul id="slots-list"></ul>
             </div>
             <button class="btn back-btn" id="back-to-locations">Back</button>
             <button class="btn next-btn" id="next-to-filters">Next</button>
         </div>
 
-        <!-- Step 4: Filters -->
         <div class="availability-step" id="step-filters" style="display: none;">
             <div class="input-group additional-filters">
                 <details>
@@ -112,7 +88,7 @@
                         </div>
                         <div class="checkbox-item">
                             <input type="checkbox" id="opt-out-repeat" name="opt-out-repeat">
-                            <label for="opt-out-repeat">Opt-out from re-matching previous meetup partners</label>
+                            <label for="opt-out-repeat">Opt-out from re-match previous meetup partners</label>
                         </div>
                         <div class="checkbox-item">
                             <input type="checkbox" id="opt-out-same-school" name="school-match" class="school-filter">
@@ -129,7 +105,6 @@
             <button id="submit-slots" class="btn primary">Submit Availability</button>
         </div>
 
-        <!-- Hidden Experiences Section (Preserved) -->
         <div class="input-group experiences-section" style="display: none;">
             <label>Experiences open to:</label>
             <div class="checkbox-group">
@@ -184,7 +159,6 @@
             </div>
         </div>
 
-        <!-- Data, Privacy & Safety Section (Unchanged) -->
         <section class="data-privacy">
             <details>
                 <summary><h3 class="text-left">Data, Privacy & Safety</h3></summary>
@@ -193,7 +167,6 @@
             </details>
         </section>
 
-        <!-- Collapsible "About Us" Section (Unchanged) -->
         <section class="about-us">
             <details>
                 <summary><h2 class="text-left about-heading">About Us</h2></summary>
@@ -206,18 +179,13 @@
             </details>
         </section>
 
-        <!-- Matching Preference Modal (Unchanged) -->
         <div id="matching-preference-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000;">
             <div style="background: white; padding: 30px; border-radius: 10px; text-align: center; max-width: 500px; width: 90%; position: relative;">
                 <h2>Matching Preference</h2>
                 <p>How would you like to be matched?</p>
                 <div style="display: flex; justify-content: space-around; margin-top: 20px;">
-                    <button id="match-all-slots" style="padding: 10px 20px; margin: 0 10px;">
-                        Match on All Slots
-                    </button>
-                    <button id="match-one-slot" style="padding: 10px 20px; margin: 0 10px;">
-                        Match on One Slot
-                    </button>
+                    <button id="match-all-slots" style="padding: 10px 20px; margin: 0 10px;">Match on All Slots</button>
+                    <button id="match-one-slot" style="padding: 10px 20px; margin: 0 10px;">Match on One Slot</button>
                 </div>
                 <button id="close-modal" style="position: absolute; top: 10px; right: 10px;">✖</button>
             </div>
@@ -227,7 +195,9 @@
             <p>© 2025 Crimson Meet</p>
         </footer>
     </div>
-
+    <!-- Load Flatpickr first -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Then load availability.js -->
     <script src="/scripts/availability.js"></script>
 </body>
 </html>

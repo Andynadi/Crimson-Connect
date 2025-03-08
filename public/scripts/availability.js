@@ -1,6 +1,5 @@
 // public/scripts/availability.js
 document.addEventListener('DOMContentLoaded', function () {
-    // Element references
     const steps = {
         email: document.getElementById('step-email'),
         locations: document.getElementById('step-locations'),
@@ -14,34 +13,65 @@ document.addEventListener('DOMContentLoaded', function () {
         backToEmail: document.getElementById('back-to-email'),
         backToLocations: document.getElementById('back-to-locations'),
         backToAvailability: document.getElementById('back-to-availability'),
-        addSlot: document.getElementById('add-slot'),
-        submitSlots: document.getElementById('submit-slots')
+        submitSlots: document.getElementById('submit-slots'),
+        addAvailability: document.getElementById('add-availability')
     };
     const emailInput = document.getElementById('email');
     const emailError = document.getElementById('email-error');
-    const dateInput = document.getElementById('date');
-    const startTimeInput = document.getElementById('start-time');
-    const endTimeInput = document.getElementById('end-time');
     const locationCheckboxes = document.querySelectorAll('input[name="locations"]');
     const slotsList = document.getElementById('slots-list');
     const modal = document.getElementById('matching-preference-modal');
+    const calendarInput = document.getElementById('calendar');
+    const timeSlotsContainer = document.getElementById('time-slots');
 
-    // Show/hide steps
     function showStep(stepKey) {
         Object.values(steps).forEach(step => step.style.display = 'none');
         steps[stepKey].style.display = 'grid';
     }
 
-    // Step navigation
-    buttons.nextToLocations.addEventListener('click', () => {
+    // Initialize Flatpickr
+    flatpickr('#calendar', {
+        minDate: 'today',
+        disableMobile: true,
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length > 0) {
+                renderTimeSlots(selectedDates[0]);
+            }
+        }
+    });
+
+    function validateEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.edu$/i.test(email.toLowerCase());
+    }
+
+    function handleEmailValidation() {
         if (validateEmail(emailInput.value)) {
+            emailError.style.display = 'none';
+            emailInput.setCustomValidity('');
+        } else {
+            emailError.style.display = 'block';
+            emailInput.setCustomValidity('Invalid email format');
+        }
+    }
+    emailInput.addEventListener('input', handleEmailValidation);
+    emailInput.addEventListener('blur', handleEmailValidation);
+
+    buttons.nextToLocations.addEventListener('click', () => {
+        console.log('Next button clicked, validating email:', emailInput.value);
+        if (validateEmail(emailInput.value)) {
+            console.log('Email validated, sending to /api/store-email');
             fetch('/api/store-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: emailInput.value })
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Fetch response:', response.status);
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
             .then(data => {
+                console.log('Server response:', data);
                 if (data.success) {
                     showStep('locations');
                 } else {
@@ -51,11 +81,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             })
             .catch(error => {
-                console.error('Error storing email:', error);
+                console.error('Fetch error:', error);
                 emailError.style.display = 'block';
                 emailInput.setCustomValidity('Error storing email');
             });
         } else {
+            console.error('Email validation failed for:', emailInput.value);
             emailError.style.display = 'block';
             emailInput.setCustomValidity('Invalid email format');
         }
@@ -74,157 +105,95 @@ document.addEventListener('DOMContentLoaded', function () {
     buttons.backToLocations.addEventListener('click', () => showStep('locations'));
 
     buttons.nextToFilters.addEventListener('click', () => {
-        if (validateSlot()) {
-            showStep('filters');
+        const selectedSlots = Array.from(slotsList.children).map(slot => ({
+            date: slot.dataset.date,
+            startTime: slot.dataset.startTime,
+            endTime: slot.dataset.endTime,
+            locations: slot.dataset.locations.split(',')
+        }));
+        if (selectedSlots.length === 0) {
+            alert('Please select at least one time slot.');
+            return;
         }
+        showStep('filters');
     });
 
     buttons.backToAvailability.addEventListener('click', () => showStep('availability'));
 
-    /** 🚨 Set Default Availability Based on Database */
-    async function setDefaultAvailability() {
-        try {
-            const response = await fetch('/api/default-availability');
-            const data = await response.json();
-            dateInput.value = data.date;
-            startTimeInput.value = data.startTime;
-            endTimeInput.value = data.endTime;
-        } catch (error) {
-            console.error('❌ Error setting default availability:', error);
-            const today = new Date();
-            const nextDay = new Date(today);
-            nextDay.setDate(today.getDate() + 1);
-            const defaultDate = nextDay.toISOString().split('T')[0];
-            dateInput.value = defaultDate;
-            startTimeInput.value = '12:00';
-            endTimeInput.value = '15:00';
-        }
-    }
-    setDefaultAvailability();
-
-    /** 🚨 Prevent Past Dates */
-    function setMinDate() {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const minDate = today.toISOString().split('T')[0];
-        dateInput.setAttribute("min", minDate);
-    }
-    setMinDate();
-
-    /** 🔎 Validate .edu Email in REAL-TIME */
-    function validateEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.edu$/.test(email.toLowerCase());
-    }
-
-    function handleEmailValidation() {
-        if (validateEmail(emailInput.value)) {
-            emailError.style.display = 'none';
-            emailInput.setCustomValidity('');
-        } else {
-            emailError.style.display = 'block';
-            emailInput.setCustomValidity('Invalid email format');
-        }
-    }
-    emailInput.addEventListener('input', handleEmailValidation);
-    emailInput.addEventListener('blur', handleEmailValidation);
-
-    /** Get Selected Locations */
     function getSelectedLocations() {
         return Array.from(locationCheckboxes)
             .filter(checkbox => checkbox.checked)
             .map(checkbox => checkbox.value);
     }
 
-    /** ❌ Prevent Overlapping and Duplicate Slots */
-    function timeToMinutes(time) {
-        const [hours, minutes] = time.split(":").map(Number);
-        return hours * 60 + minutes;
+    function renderTimeSlots(date) {
+        timeSlotsContainer.innerHTML = '';
+        const day = date.toISOString().split('T')[0];
+        const slots = [
+            '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
+            '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
+            '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
+            '17:00', '17:30', '18:00', '18:30', '19:00', '19:30',
+            '20:00', '20:30', '21:00', '21:30', '22:00', '22:30',
+            '23:00'
+        ];
+
+        // Fetch slot stats
+        fetch('/api/slot-stats')
+            .then(response => response.json())
+            .then(stats => {
+                slots.forEach(startTime => {
+                    const endTime = addMinutes(startTime, 30);
+                    const slotDiv = document.createElement('div');
+                    slotDiv.className = 'time-slot';
+                    const slotStat = stats.find(s => s.date === day && s.start_time === startTime && s.end_time === endTime);
+                    slotDiv.textContent = `${startTime} - ${endTime}`;
+                    if (slotStat) {
+                        slotDiv.textContent += `\n(${slotStat.user_count} users: ${slotStat.domains || 'N/A'})`;
+                    }
+                    slotDiv.dataset.date = day;
+                    slotDiv.dataset.startTime = startTime;
+                    slotDiv.dataset.endTime = endTime;
+                    slotDiv.addEventListener('click', () => {
+                        slotDiv.classList.toggle('selected');
+                    });
+                    timeSlotsContainer.appendChild(slotDiv);
+                });
+            })
+            .catch(error => console.error('Error fetching slot stats:', error));
     }
 
-    function checkForOverlap(newSlot) {
-        return Array.from(slotsList.children).some(slot => {
-            const existingDate = slot.dataset.date;
-            const existingStartTime = slot.dataset.startTime;
-            const existingEndTime = slot.dataset.endTime;
-            const existingLocations = slot.dataset.locations.split(',');
+    function addMinutes(time, minutes) {
+        const [hours, mins] = time.split(':').map(Number);
+        const date = new Date();
+        date.setHours(hours, mins, 0, 0);
+        date.setMinutes(date.getMinutes() + minutes);
+        return date.toTimeString().slice(0, 5);
+    }
 
-            if (existingDate !== newSlot.date) return false;
+    buttons.addAvailability.addEventListener('click', () => {
+        const selectedSlots = Array.from(timeSlotsContainer.querySelectorAll('.time-slot.selected'));
+        const locations = getSelectedLocations();
+        selectedSlots.forEach(slot => {
+            const li = document.createElement('li');
+            li.textContent = `${slot.dataset.date} | ${slot.dataset.startTime} - ${slot.dataset.endTime} | ${locations.join(', ')}`;
+            li.dataset.date = slot.dataset.date;
+            li.dataset.startTime = slot.dataset.startTime;
+            li.dataset.endTime = slot.dataset.endTime;
+            li.dataset.locations = locations.join(',');
 
-            const hasLocationOverlap = newSlot.locations.some(location => 
-                existingLocations.includes(location)
-            );
-            if (!hasLocationOverlap) return false;
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = "×";
+            removeBtn.className = "remove-slot";
+            removeBtn.onclick = () => li.remove();
+            li.appendChild(removeBtn);
 
-            const existingStart = timeToMinutes(existingStartTime);
-            const existingEnd = timeToMinutes(existingEndTime);
-            const newStart = timeToMinutes(newSlot.startTime);
-            const newEnd = timeToMinutes(newSlot.endTime);
-
-            return (newStart < existingEnd && newEnd > existingStart);
+            slotsList.appendChild(li);
         });
-    }
-
-    /** 🚦 Validate Slots Before Adding */
-    function validateSlot() {
-        if (!validateEmail(emailInput.value)) {
-            alert("Please use a valid .edu email address");
-            return false;
-        }
-
-        if (!dateInput.value || new Date(dateInput.value) < new Date().setHours(0, 0, 0, 0)) {
-            alert("You cannot select a past date.");
-            return false;
-        }
-
-        if (!startTimeInput.value || !endTimeInput.value || startTimeInput.value >= endTimeInput.value) {
-            alert("Invalid time range. End time must be after start time.");
-            return false;
-        }
-
-        const selectedLocations = getSelectedLocations();
-        if (selectedLocations.length === 0) {
-            alert("Please select at least one location.");
-            return false;
-        }
-
-        return true;
-    }
-
-    /** 🏗️ Add New Slot */
-    buttons.addSlot.addEventListener('click', function () {
-        if (!validateSlot()) return;
-
-        const selectedLocations = getSelectedLocations();
-        const newSlot = {
-            email: emailInput.value,
-            date: dateInput.value,
-            startTime: startTimeInput.value,
-            endTime: endTimeInput.value,
-            locations: selectedLocations
-        };
-
-        if (checkForOverlap(newSlot)) {
-            alert("You have already added an overlapping or duplicate time slot for one or more selected locations.");
-            return;
-        }
-
-        const li = document.createElement('li');
-        li.textContent = `${newSlot.date} | ${newSlot.startTime} - ${newSlot.endTime} | ${newSlot.locations.join(', ')}`;
-        li.dataset.date = newSlot.date;
-        li.dataset.startTime = newSlot.startTime;
-        li.dataset.endTime = newSlot.endTime;
-        li.dataset.locations = newSlot.locations.join(',');
-
-        const removeBtn = document.createElement('button');
-        removeBtn.textContent = "×";
-        removeBtn.className = "remove-slot";
-        removeBtn.onclick = () => li.remove();
-        li.appendChild(removeBtn);
-
-        slotsList.appendChild(li);
+        // Clear selected slots
+        selectedSlots.forEach(slot => slot.classList.remove('selected'));
     });
 
-    /** 🌟 Handle Matching Preference Modal */
     const createMatchingPreferenceModal = () => {
         return new Promise((resolve) => {
             modal.style.display = 'flex';
@@ -255,7 +224,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
-    /** 🚀 Submit All Slots */
     buttons.submitSlots.addEventListener('click', async function () {
         const slots = Array.from(slotsList.children).map(slot => ({
             email: emailInput.value,
@@ -317,7 +285,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    /** 🔒 Mutual Exclusivity for School Filters */
     const optOutSchool = document.getElementById("opt-out-same-school");
     const onlyMatchSchool = document.getElementById("only-match-same-school");
 

@@ -39,7 +39,8 @@ async function initializeDatabase() {
                     opt_out_repeat INTEGER DEFAULT 0,
                     opt_out_same_school INTEGER DEFAULT 0,
                     only_match_same_school INTEGER DEFAULT 0,
-                    experiences TEXT
+                    experiences TEXT,
+                    last_activity DATETIME DEFAULT CURRENT_TIMESTAMP
                 )`, (err) => {
                     if (err) console.error('❌ Error creating availability table:', err);
                 });
@@ -258,6 +259,28 @@ app.get('/api/default-availability', async (req, res) => {
     } catch (error) {
         console.error('❌ Error fetching default availability:', error);
         res.status(500).json({ error: 'Failed to fetch default availability' });
+    }
+});
+
+app.get('/api/slot-stats', async (req, res) => {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const rows = await new Promise((resolve, reject) => {
+            db.all(`
+                SELECT date, start_time, end_time, COUNT(*) as user_count,
+                       GROUP_CONCAT(DISTINCT SUBSTR(email, INSTR(email, '@') + 1, LENGTH(email))) as domains
+                FROM availability 
+                WHERE matched = 0 AND date >= ?
+                GROUP BY date, start_time, end_time
+            `, [today], (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
+            });
+        });
+        res.json(rows);
+    } catch (error) {
+        console.error('❌ Error fetching slot stats:', error);
+        res.status(500).json({ error: 'Failed to fetch slot stats' });
     }
 });
 
