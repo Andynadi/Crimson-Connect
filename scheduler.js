@@ -1,7 +1,7 @@
 const schedule = require('node-schedule');
 const { exec } = require('child_process');
 
-schedule.scheduleJob('0 */2 * * *', () => {
+schedule.scheduleJob('0 */4 * * *', () => {
     console.log('⏳ Running matching script...');
     exec('node matchAndEmail.js', (error, stdout, stderr) => {
         if (error) {
