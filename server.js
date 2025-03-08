@@ -6,7 +6,6 @@ const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 
-// Wrap database connection in try-catch
 let db;
 try {
     db = new sqlite3.Database('availability.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
@@ -21,11 +20,11 @@ try {
     process.exit(1);
 }
 
-// Database initialization function
 async function initializeDatabase() {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
             try {
+                // Create tables if they don’t exist
                 db.run(`CREATE TABLE IF NOT EXISTS availability (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     email TEXT NOT NULL,
@@ -41,7 +40,9 @@ async function initializeDatabase() {
                     opt_out_same_school INTEGER DEFAULT 0,
                     only_match_same_school INTEGER DEFAULT 0,
                     experiences TEXT
-                )`);
+                )`, (err) => {
+                    if (err) console.error('❌ Error creating availability table:', err);
+                });
 
                 db.run(`CREATE TABLE IF NOT EXISTS matches (
                     group_id TEXT NOT NULL,
@@ -50,39 +51,67 @@ async function initializeDatabase() {
                     start_time TEXT NOT NULL,
                     end_time TEXT NOT NULL,
                     locations TEXT NOT NULL
-                )`);
+                )`, (err) => {
+                    if (err) console.error('❌ Error creating matches table:', err);
+                });
 
-                resolve();
+                db.run(`CREATE TABLE IF NOT EXISTS incomplete_users (
+                    email TEXT PRIMARY KEY,
+                    last_input DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    unsubscribed INTEGER DEFAULT 0
+                )`, (err) => {
+                    if (err) console.error('❌ Error creating incomplete_users table:', err);
+                });
+
+                // Check if last_activity exists, add it if not
+                db.all(`PRAGMA table_info(availability)`, (err, columns) => {
+                    if (err) {
+                        console.error('❌ Error checking table schema:', err);
+                        reject(err);
+                        return;
+                    }
+                    const hasLastActivity = columns.some(col => col.name === 'last_activity');
+                    if (!hasLastActivity) {
+                        db.run(`ALTER TABLE availability ADD COLUMN last_activity DATETIME DEFAULT CURRENT_TIMESTAMP`, (alterErr) => {
+                            if (alterErr) {
+                                console.error('❌ Failed to add last_activity column:', alterErr);
+                                reject(alterErr);
+                            } else {
+                                console.log('✅ Added last_activity column to availability table.');
+                                resolve();
+                            }
+                        });
+                    } else {
+                        console.log('✅ last_activity column already exists.');
+                        resolve();
+                    }
+                });
             } catch (error) {
+                console.error('❌ Database initialization error:', error);
                 reject(error);
             }
         });
     });
 }
 
-// Express middleware setup
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// Nunjucks setup
 nunjucks.configure('templates', {
     autoescape: true,
     express: app
 });
 app.set('view engine', 'html');
 
-// Debug middleware
 app.use((req, res, next) => {
     console.log(`🔎 ${req.method} request to ${req.url}`);
     next();
 });
 
-// Routes
 app.get('/', (req, res) => res.render('index.html'));
 
-// Admin Dashboard Route
 app.get('/admin', async (req, res) => {
     try {
         db.all("SELECT * FROM availability ORDER BY created_at DESC", [], (err, rows) => {
@@ -98,10 +127,32 @@ app.get('/admin', async (req, res) => {
     }
 });
 
-// Submit availability route
-app.post('/api/submit-availability', async (req, res) => {
-    console.log("📥 Received data:", req.body);
+app.post('/api/store-email', async (req, res) => {
+    const { email } = req.body;
+    if (!email || !email.match(/^[^\s@]+@[^\s@]+\.edu$/)) {
+        return res.status(400).json({ success: false, message: 'Invalid .edu email' });
+    }
 
+    try {
+        await new Promise((resolve, reject) => {
+            db.run(
+                `INSERT OR REPLACE INTO incomplete_users (email, last_input, unsubscribed) 
+                 VALUES (?, datetime('now'), (SELECT unsubscribed FROM incomplete_users WHERE email = ?))`,
+                [email, email],
+                (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                }
+            );
+        });
+        res.json({ success: true });
+    } catch (error) {
+        console.error('❌ Error storing email:', error);
+        res.status(500).json({ success: false, message: 'Failed to store email' });
+    }
+});
+
+app.post('/api/submit-availability', async (req, res) => {
     const { 
         email, 
         slots, 
@@ -121,15 +172,15 @@ app.post('/api/submit-availability', async (req, res) => {
     try {
         await new Promise((resolve, reject) => {
             db.serialize(() => {
-                db.run('BEGIN TRANSACTION');
+                db.run('BEGIN TRANSACTION', (err) => {
+                    if (err) reject(err);
+                });
 
                 for (const slot of slots) {
                     const { date, startTime, endTime, locations } = slot;
-                    
-                    // ✅ Prevent past dates in JavaScript
                     const today = new Date().toISOString().split('T')[0];
                     if (date < today) {
-                        console.error(`❌ Invalid date: ${date} (Cannot be in the past)`);
+                        console.error(`❌ Invalid date: ${date}`);
                         reject(new Error("Cannot submit availability for past dates."));
                         return;
                     }
@@ -141,8 +192,9 @@ app.post('/api/submit-availability', async (req, res) => {
                         INSERT INTO availability (
                             email, date, start_time, end_time, locations, 
                             matching_preference, opt_out_1to1, opt_out_repeat, 
-                            opt_out_same_school, only_match_same_school, experiences
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            opt_out_same_school, only_match_same_school, experiences,
+                            last_activity
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
                     `, [
                         email, date, startTime, endTime, locationsString,
                         matchingPreference,
@@ -156,6 +208,10 @@ app.post('/api/submit-availability', async (req, res) => {
                     });
                 }
 
+                db.run(`DELETE FROM incomplete_users WHERE email = ?`, [email], (err) => {
+                    if (err) reject(err);
+                });
+
                 db.run('COMMIT', (err) => {
                     if (err) reject(err);
                     else resolve();
@@ -166,17 +222,16 @@ app.post('/api/submit-availability', async (req, res) => {
         res.json({ success: true, message: "Availability submitted successfully!" });
     } catch (error) {
         console.error("❌ Database error:", error);
-        db.run('ROLLBACK');
+        db.run('ROLLBACK', (err) => {
+            if (err) console.error('❌ Rollback failed:', err);
+        });
         res.status(500).json({ success: false, message: error.message || 'Database error occurred' });
     }
 });
 
-// New endpoint to get default availability
 app.get('/api/default-availability', async (req, res) => {
     try {
         const today = new Date().toISOString().split('T')[0];
-        
-        // Query unmatched future entries, ordered by date and frequency
         const rows = await new Promise((resolve, reject) => {
             db.all(`
                 SELECT date, start_time, end_time, COUNT(*) as frequency 
@@ -195,7 +250,6 @@ app.get('/api/default-availability', async (req, res) => {
             const { date, start_time, end_time } = rows[0];
             res.json({ date, startTime: start_time, endTime: end_time });
         } else {
-            // If no unmatched entries, set default to next day at 12:00–15:00
             const nextDay = new Date();
             nextDay.setDate(nextDay.getDate() + 1);
             const defaultDate = nextDay.toISOString().split('T')[0];
@@ -207,11 +261,33 @@ app.get('/api/default-availability', async (req, res) => {
     }
 });
 
-// Initialize database and start server
+app.get('/unsubscribe', async (req, res) => {
+    const { email } = req.query;
+    if (!email) {
+        return res.status(400).send('Email is required');
+    }
+
+    try {
+        await new Promise((resolve, reject) => {
+            db.run(
+                `UPDATE incomplete_users SET unsubscribed = 1 WHERE email = ?`,
+                [email],
+                (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                }
+            );
+        });
+        res.send('You have been unsubscribed from Crimson Meet reminders.');
+    } catch (error) {
+        console.error('❌ Error unsubscribing:', error);
+        res.status(500).send('Failed to unsubscribe');
+    }
+});
+
 async function startServer() {
     try {
         await initializeDatabase();
-        
         const PORT = 5500;
         app.listen(PORT, () => {
             console.log(`🚀 Server running at http://localhost:${PORT}`);
@@ -222,13 +298,11 @@ async function startServer() {
     }
 }
 
-// Start the server
 startServer().catch(error => {
     console.error('Failed to start server:', error);
     process.exit(1);
 });
 
-// Graceful shutdown
 process.on('SIGINT', () => {
     console.log('Closing database connection...');
     db.close(() => {

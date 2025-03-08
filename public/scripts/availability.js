@@ -1,26 +1,96 @@
+// public/scripts/availability.js
 document.addEventListener('DOMContentLoaded', function () {
-    const addSlotBtn = document.getElementById('add-slot');
-    const submitSlotsBtn = document.getElementById('submit-slots');
-    const slotsList = document.getElementById('slots-list');
-    const dateInput = document.getElementById('date');
+    // Element references
+    const steps = {
+        email: document.getElementById('step-email'),
+        locations: document.getElementById('step-locations'),
+        availability: document.getElementById('step-availability'),
+        filters: document.getElementById('step-filters')
+    };
+    const buttons = {
+        nextToLocations: document.getElementById('next-to-locations'),
+        nextToAvailability: document.getElementById('next-to-availability'),
+        nextToFilters: document.getElementById('next-to-filters'),
+        backToEmail: document.getElementById('back-to-email'),
+        backToLocations: document.getElementById('back-to-locations'),
+        backToAvailability: document.getElementById('back-to-availability'),
+        addSlot: document.getElementById('add-slot'),
+        submitSlots: document.getElementById('submit-slots')
+    };
     const emailInput = document.getElementById('email');
     const emailError = document.getElementById('email-error');
+    const dateInput = document.getElementById('date');
     const startTimeInput = document.getElementById('start-time');
     const endTimeInput = document.getElementById('end-time');
     const locationCheckboxes = document.querySelectorAll('input[name="locations"]');
+    const slotsList = document.getElementById('slots-list');
+    const modal = document.getElementById('matching-preference-modal');
+
+    // Show/hide steps
+    function showStep(stepKey) {
+        Object.values(steps).forEach(step => step.style.display = 'none');
+        steps[stepKey].style.display = 'grid';
+    }
+
+    // Step navigation
+    buttons.nextToLocations.addEventListener('click', () => {
+        if (validateEmail(emailInput.value)) {
+            fetch('/api/store-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailInput.value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showStep('locations');
+                } else {
+                    console.error('Failed to store email:', data.message);
+                    emailError.style.display = 'block';
+                    emailInput.setCustomValidity('Failed to store email');
+                }
+            })
+            .catch(error => {
+                console.error('Error storing email:', error);
+                emailError.style.display = 'block';
+                emailInput.setCustomValidity('Error storing email');
+            });
+        } else {
+            emailError.style.display = 'block';
+            emailInput.setCustomValidity('Invalid email format');
+        }
+    });
+
+    buttons.backToEmail.addEventListener('click', () => showStep('email'));
+
+    buttons.nextToAvailability.addEventListener('click', () => {
+        if (getSelectedLocations().length > 0) {
+            showStep('availability');
+        } else {
+            alert('Please select at least one location.');
+        }
+    });
+
+    buttons.backToLocations.addEventListener('click', () => showStep('locations'));
+
+    buttons.nextToFilters.addEventListener('click', () => {
+        if (validateSlot()) {
+            showStep('filters');
+        }
+    });
+
+    buttons.backToAvailability.addEventListener('click', () => showStep('availability'));
 
     /** 🚨 Set Default Availability Based on Database */
     async function setDefaultAvailability() {
         try {
             const response = await fetch('/api/default-availability');
             const data = await response.json();
-
             dateInput.value = data.date;
             startTimeInput.value = data.startTime;
             endTimeInput.value = data.endTime;
         } catch (error) {
             console.error('❌ Error setting default availability:', error);
-            // Fallback: Set to next day if API fails
             const today = new Date();
             const nextDay = new Date(today);
             nextDay.setDate(today.getDate() + 1);
@@ -30,11 +100,9 @@ document.addEventListener('DOMContentLoaded', function () {
             endTimeInput.value = '15:00';
         }
     }
-
-    // Set defaults when the page loads
     setDefaultAvailability();
 
-    /** 🚨 Prevent Past Dates from Being Selected */
+    /** 🚨 Prevent Past Dates */
     function setMinDate() {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -79,10 +147,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const existingStartTime = slot.dataset.startTime;
             const existingEndTime = slot.dataset.endTime;
             const existingLocations = slot.dataset.locations.split(',');
-            
+
             if (existingDate !== newSlot.date) return false;
-            
-            // Check if there's any overlap in locations
+
             const hasLocationOverlap = newSlot.locations.some(location => 
                 existingLocations.includes(location)
             );
@@ -124,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /** 🏗️ Add New Slot */
-    addSlotBtn.addEventListener('click', function () {
+    buttons.addSlot.addEventListener('click', function () {
         if (!validateSlot()) return;
 
         const selectedLocations = getSelectedLocations();
@@ -160,37 +227,36 @@ document.addEventListener('DOMContentLoaded', function () {
     /** 🌟 Handle Matching Preference Modal */
     const createMatchingPreferenceModal = () => {
         return new Promise((resolve) => {
-            const modal = document.getElementById('matching-preference-modal');
             modal.style.display = 'flex';
 
-            document.getElementById('match-all-slots').addEventListener('click', () => {
+            const matchAll = () => {
                 modal.style.display = 'none';
                 resolve('all');
-            });
-
-            document.getElementById('match-one-slot').addEventListener('click', () => {
+            };
+            const matchOne = () => {
                 modal.style.display = 'none';
                 resolve('one');
-            });
-
-            document.getElementById('close-modal').addEventListener('click', () => {
+            };
+            const close = () => {
                 modal.style.display = 'none';
                 resolve(null);
-            });
+            };
+
+            const matchAllBtn = document.getElementById('match-all-slots');
+            const matchOneBtn = document.getElementById('match-one-slot');
+            const closeBtn = document.getElementById('close-modal');
+            matchAllBtn.removeEventListener('click', matchAll);
+            matchOneBtn.removeEventListener('click', matchOne);
+            closeBtn.removeEventListener('click', close);
+
+            matchAllBtn.addEventListener('click', matchAll);
+            matchOneBtn.addEventListener('click', matchOne);
+            closeBtn.addEventListener('click', close);
         });
     };
 
     /** 🚀 Submit All Slots */
-    submitSlotsBtn.addEventListener('click', async function () {
-        if (!validateSlot()) return;
-
-        const optOut1to1 = document.getElementById('opt-out-1to1').checked;
-        const optOutRepeat = document.getElementById('opt-out-repeat').checked;
-        const optOutSameSchool = document.getElementById('opt-out-same-school').checked;
-        const onlyMatchSameSchool = document.getElementById('only-match-same-school').checked;
-        const selectedExperiences = Array.from(document.querySelectorAll('input[name="experiences"]:checked'))
-            .map(checkbox => checkbox.value);
-
+    buttons.submitSlots.addEventListener('click', async function () {
         const slots = Array.from(slotsList.children).map(slot => ({
             email: emailInput.value,
             date: slot.dataset.date,
@@ -204,16 +270,21 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        const optOut1to1 = document.getElementById('opt-out-1to1').checked;
+        const optOutRepeat = document.getElementById('opt-out-repeat').checked;
+        const optOutSameSchool = document.getElementById('opt-out-same-school').checked;
+        const onlyMatchSameSchool = document.getElementById('only-match-same-school').checked;
+        const selectedExperiences = Array.from(document.querySelectorAll('input[name="experiences"]:checked'))
+            .map(checkbox => checkbox.value);
+
         let matchingPreference = "one";
         if (slots.length > 1) {
             matchingPreference = await createMatchingPreferenceModal();
-            if (matchingPreference === null) {
-                return; // User closed the modal, do not proceed with submission
-            }
+            if (matchingPreference === null) return;
         }
 
-        submitSlotsBtn.disabled = true;
-        submitSlotsBtn.textContent = 'Submitting...';
+        buttons.submitSlots.disabled = true;
+        buttons.submitSlots.textContent = 'Submitting...';
 
         try {
             const response = await fetch('http://localhost:5500/api/submit-availability', {
@@ -236,12 +307,13 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('Availability submitted successfully!');
             slotsList.innerHTML = '';
             emailInput.value = '';
+            showStep('email');
         } catch (error) {
             console.error('Submission error:', error);
             alert('Submission failed. Please try again.');
         } finally {
-            submitSlotsBtn.disabled = false;
-            submitSlotsBtn.textContent = 'Submit Availability';
+            buttons.submitSlots.disabled = false;
+            buttons.submitSlots.textContent = 'Submit Availability';
         }
     });
 
@@ -250,14 +322,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const onlyMatchSchool = document.getElementById("only-match-same-school");
 
     optOutSchool.addEventListener("change", function() {
-        if (this.checked) {
-            onlyMatchSchool.checked = false;
-        }
+        if (this.checked) onlyMatchSchool.checked = false;
     });
 
     onlyMatchSchool.addEventListener("change", function() {
-        if (this.checked) {
-            optOutSchool.checked = false;
-        }
+        if (this.checked) optOutSchool.checked = false;
     });
 });
